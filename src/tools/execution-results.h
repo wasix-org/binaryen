@@ -99,7 +99,9 @@ struct ExecutionResults {
   // get results of execution
   void get(Module& wasm) {
     LoggingExternalInterface interface(loggings);
+    #ifndef __wasi__
     try {
+    #endif
       ModuleRunner instance(wasm, &interface);
       // execute all exported methods (that are therefore preserved through
       // opts)
@@ -121,6 +123,7 @@ struct ExecutionResults {
           }
         }
       }
+    #ifndef __wasi__
     } catch (const TrapException&) {
       // May throw in instance creation (init of offsets).
     } catch (const HostLimitException&) {
@@ -129,6 +132,7 @@ struct ExecutionResults {
       // change whether a host limit is reached.
       ignore = true;
     }
+    #endif
   }
 
   void printValue(Literal value) {
@@ -249,9 +253,12 @@ struct ExecutionResults {
 
   FunctionResult run(Function* func, Module& wasm) {
     LoggingExternalInterface interface(loggings);
+    #ifndef __wasi__
     try {
+    #endif
       ModuleRunner instance(wasm, &interface);
       return run(func, wasm, instance);
+    #ifndef __wasi__
     } catch (const TrapException&) {
       // May throw in instance creation (init of offsets).
       return {};
@@ -262,10 +269,13 @@ struct ExecutionResults {
       ignore = true;
       return {};
     }
+    #endif
   }
 
   FunctionResult run(Function* func, Module& wasm, ModuleRunner& instance) {
+    #ifndef __wasi__
     try {
+    #endif
       // call the method
       Literals arguments;
       for (const auto& param : func->getParams()) {
@@ -278,6 +288,7 @@ struct ExecutionResults {
         arguments.push_back(Literal::makeZero(param));
       }
       return instance.callFunction(func->name, arguments);
+    #ifndef __wasi__
     } catch (const TrapException&) {
       return Trap{};
     } catch (const WasmException& e) {
@@ -289,6 +300,7 @@ struct ExecutionResults {
       ignore = true;
       return {};
     }
+    #endif
   }
 };
 

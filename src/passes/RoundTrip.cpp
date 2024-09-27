@@ -51,13 +51,17 @@ struct RoundTrip : public Pass {
     auto input = buffer.getAsChars();
     WasmBinaryReader parser(*module, features, input);
     parser.setDWARF(getPassOptions().debugInfo);
+    #ifndef __wasi__
     try {
+    #endif
       parser.read();
+    #ifndef __wasi__
     } catch (ParseException& p) {
       p.dump(std::cerr);
       std::cerr << '\n';
       Fatal() << "error in parsing wasm binary";
     }
+    #endif
 
     if (!preserveTypeOrder) {
       module->typeIndices.clear();

@@ -97,10 +97,15 @@ inline TrapMode trapModeFromString(std::string const& str) {
   } else if (str == "js") {
     return TrapMode::JS;
   } else {
+    #ifdef __wasi__
+    std::cout << "Unsupported trap mode: " << str << std::endl;
+    abort();
+    #else
     throw std::invalid_argument(
       "Unsupported trap mode \"" + str +
       "\". "
       "Valid modes are \"allow\", \"js\", and \"clamp\"");
+    #endif
   }
 }
 

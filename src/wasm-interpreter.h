@@ -2556,12 +2556,31 @@ public:
   Flow visitResume(Resume* curr) { WASM_UNREACHABLE("unimplemented"); }
   Flow visitSuspend(Suspend* curr) { WASM_UNREACHABLE("unimplemented"); }
 
-  void trap(const char* why) override { throw NonconstantException(); }
+  void trap(const char* why) override {
+    #ifdef __wasi__
+    std::cout << "trap has occured: " << why << std::endl;
+    abort();
+    #else
+    throw NonconstantException(); 
+    #endif
+  }
 
-  void hostLimit(const char* why) override { throw NonconstantException(); }
+  void hostLimit(const char* why) override { 
+    #ifdef __wasi__
+    std::cout << "host limit has reached: " << why << std::endl;
+    abort();
+    #else
+    throw NonconstantException(); 
+    #endif
+  }
 
   virtual void throwException(const WasmException& exn) override {
+    #ifdef __wasi__
+    std::cout << "exception occured: " << exn << std::endl;
+    abort();
+    #else
     throw NonconstantException();
+    #endif
   }
 };
 
@@ -4155,8 +4174,11 @@ public:
   }
   Flow visitTry(Try* curr) {
     NOTE_ENTER("Try");
+    #ifndef __wasi__
     try {
+    #endif
       return self()->visit(curr->body);
+    #ifndef __wasi__
     } catch (const WasmException& e) {
       // If delegation is in progress and the current try is not the target of
       // the delegation, don't handle it and just rethrow.
@@ -4201,11 +4223,15 @@ public:
       // This exception is not caught by this try-catch. Rethrow it.
       throw;
     }
+    #endif
   }
   Flow visitTryTable(TryTable* curr) {
     NOTE_ENTER("TryTable");
+    #ifndef __wasi__
     try {
+    #endif
       return self()->visit(curr->body);
+    #ifndef __wasi__
     } catch (const WasmException& e) {
       auto exnData = e.exn.getExnData();
       for (size_t i = 0; i < curr->catchTags.size(); i++) {
@@ -4227,6 +4253,7 @@ public:
       // This exception is not caught by this try_table. Rethrow it.
       throw;
     }
+    #endif
   }
   Flow visitRethrow(Rethrow* curr) {
     for (int i = exceptionStack.size() - 1; i >= 0; i--) {

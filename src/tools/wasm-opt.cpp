@@ -274,8 +274,11 @@ int main(int argc, const char* argv[]) {
     reader.setDWARF(options.passOptions.debugInfo &&
                     !willRemoveDebugInfo(options.passes));
     reader.setProfile(options.profile);
+    #ifndef __wasi__
     try {
+    #endif
       reader.read(inputFile, wasm, inputSourceMapFilename);
+    #ifndef __wasi__
     } catch (ParseException& p) {
       p.dump(std::cerr);
       std::cerr << '\n';
@@ -293,6 +296,7 @@ int main(int argc, const char* argv[]) {
       Fatal() << "error building module, std::bad_alloc (possibly invalid "
                  "request for silly amounts of memory)";
     }
+    #endif
 
     options.applyOptionsAfterParse(wasm);
 

@@ -142,7 +142,11 @@ struct ShellExternalInterface : ModuleRunner::ExternalInterface {
     } else if (import->module == ENV && import->base == EXIT) {
       // XXX hack for torture tests
       std::cout << "exit()\n";
+      #ifdef __wasi__
+      abort();
+      #else
       throw ExitException();
+      #endif
     } else if (auto* inst = getImportInstance(import)) {
       return inst->callExport(import->base, arguments);
     }
@@ -341,15 +345,30 @@ struct ShellExternalInterface : ModuleRunner::ExternalInterface {
 
   void trap(const char* why) override {
     std::cout << "[trap " << why << "]\n";
+    #ifdef __wasi__
+    abort();
+    #else
     throw TrapException();
+    #endif
   }
 
   void hostLimit(const char* why) override {
     std::cout << "[host limit " << why << "]\n";
+    #ifdef __wasi__
+    abort();
+    #else
     throw HostLimitException();
+    #endif
   }
 
-  void throwException(const WasmException& exn) override { throw exn; }
+  void throwException(const WasmException& exn) override {
+    #ifdef __wasi__
+    std::cout << "wasm exception occured: " << exn << std::endl;
+    abort();
+    #else
+    throw exn;
+    #endif
+  }
 };
 
 } // namespace wasm

@@ -5640,13 +5640,17 @@ BinaryenModuleRef BinaryenModuleReadWithFeatures(char* input,
   std::vector<char> buffer(false);
   buffer.resize(inputSize);
   std::copy_n(input, inputSize, buffer.begin());
+  #ifndef __wasi__
   try {
+  #endif
     WasmBinaryReader parser(*wasm, features, buffer);
     parser.read();
+  #ifndef __wasi__
   } catch (ParseException& p) {
     p.dump(std::cerr);
     Fatal() << "error in parsing wasm binary";
   }
+  #endif
   // Do not regress code size by maintaining type order. TODO: Add an option to
   // control this.
   wasm->typeIndices.clear();
@@ -6147,13 +6151,17 @@ ExpressionRunnerRunAndDispose(ExpressionRunnerRef runner,
                               BinaryenExpressionRef expr) {
   auto* R = (CExpressionRunner*)runner;
   Expression* ret = nullptr;
+  #ifndef __wasi__
   try {
+  #endif
     auto flow = R->visit(expr);
     if (!flow.breaking() && !flow.values.empty()) {
       ret = flow.getConstExpression(*R->getModule());
     }
+  #ifndef __wasi__
   } catch (CExpressionRunner::NonconstantException&) {
   }
+  #endif
   delete R;
   return ret;
 }

@@ -173,6 +173,9 @@ if(NOT EMSCRIPTEN)
 endif()
 
 # Compiler setup.
+if(WASIX)
+  add_compile_flag("-fno-exceptions")
+endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/FP16/include)

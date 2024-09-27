@@ -123,8 +123,11 @@ void ThreadPool::initialize(size_t num) {
   ready.store(threads.size());
   resetThreadsAreReady();
   for (size_t i = 0; i < num; i++) {
+    #ifndef __wasi__
     try {
+    #endif
       threads.emplace_back(std::make_unique<Thread>(this));
+    #ifndef __wasi__
     } catch (std::system_error&) {
       // failed to create a thread - don't use multithreading, as if num cores
       // == 1
@@ -132,6 +135,7 @@ void ThreadPool::initialize(size_t num) {
       threads.clear();
       return;
     }
+    #endif
   }
   DEBUG_POOL("initialize() waiting\n");
   condition.wait(lock, [this]() { return areThreadsReady(); });

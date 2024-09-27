@@ -8,6 +8,7 @@ set(fuzzing_SOURCES
 )
 
 binaryen_add_executable(wasm-opt "${fuzzing_SOURCES};wasm-opt.cpp")
+if(NOT WASIX)
 binaryen_add_executable(wasm-metadce wasm-metadce.cpp)
 binaryen_add_executable(wasm2js wasm2js.cpp)
 binaryen_add_executable(wasm-emscripten-finalize wasm-emscripten-finalize.cpp)
@@ -23,3 +24,4 @@ if(NOT BUILD_EMSCRIPTEN_TOOLS_ONLY)
 endif()
 
 add_subdirectory(wasm-split)
+endif()

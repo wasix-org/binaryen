@@ -84,18 +84,33 @@ Name UniqueNameMapper::sourceToUnique(Name sName) {
     return DELEGATE_CALLER_TARGET;
   }
   if (labelMappings.find(sName) == labelMappings.end()) {
+    #ifdef __wasi__
+    std::cout << "bad label in sourceToUnique: " << sName.toString() << std::endl;
+    abort();
+    #else
     throw ParseException("bad label in sourceToUnique: " + sName.toString());
+    #endif
   }
   if (labelMappings[sName].empty()) {
+    #ifdef __wasi__
+    std::cout << "use of popped label in sourceToUnique: " << sName.toString() << std::endl;
+    abort();
+    #else
     throw ParseException("use of popped label in sourceToUnique: " +
                          sName.toString());
+    #endif
   }
   return labelMappings[sName].back();
 }
 
 Name UniqueNameMapper::uniqueToSource(Name name) {
   if (reverseLabelMapping.find(name) == reverseLabelMapping.end()) {
+    #ifdef __wasi__
+    std::cout << "label mismatch in uniqueToSource" << std::endl;
+    abort();
+    #else
     throw ParseException("label mismatch in uniqueToSource");
+    #endif
   }
   return reverseLabelMapping[name];
 }

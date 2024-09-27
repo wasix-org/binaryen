@@ -1,0 +1,11 @@
+[package]
+name = "amin/wasm-opt"
+
+[[module]]
+name = "wasm-opt"
+source = "out/bin/wasm-opt"
+
+[[command]]
+name = "wasm-opt"
+module = "wasm-opt"
+runner = "https://webc.org/runner/wasi"

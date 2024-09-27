@@ -108,11 +108,21 @@ template<typename T, typename MiniT> struct LEB {
       T unused_bits = payload & unused_bits_mask;
       if (std::is_signed_v<T> && value < 0) {
         if (unused_bits != unused_bits_mask) {
+          #ifdef __wasi__
+          std::cout << "Unused negative LEB bits must be 1s" << std::endl;
+          abort();
+          #else
           throw ParseException("Unused negative LEB bits must be 1s");
+          #endif
         }
       } else {
         if (unused_bits != 0) {
+          #ifdef __wasi__
+          std::cout << "Unused non-negative LEB bits must be 0s" << std::endl;
+          abort();
+          #else
           throw ParseException("Unused non-negative LEB bits must be 0s");
+          #endif
         }
       }
       if (last) {
@@ -120,7 +130,12 @@ template<typename T, typename MiniT> struct LEB {
       }
       shift += 7;
       if (size_t(shift) >= sizeof(T) * 8) {
+        #ifdef __wasi__
+        std::cout << "LEB overflow" << std::endl;
+        abort();
+        #else
         throw ParseException("LEB overflow");
+        #endif
       }
     }
     // If signed LEB, then we might need to sign-extend.
@@ -131,8 +146,13 @@ template<typename T, typename MiniT> struct LEB {
         value <<= sext_bits;
         value >>= sext_bits;
         if (value >= 0) {
+          #ifdef __wasi__
+          std::cout << " LEBsign-extend should produce a negative value" << std::endl;
+          abort();
+          #else
           throw ParseException(
             " LEBsign-extend should produce a negative value");
+          #endif
         }
       }
     }

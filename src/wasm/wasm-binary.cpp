@@ -2290,7 +2290,12 @@ void WasmBinaryReader::readTypes() {
   auto readContinuationDef = [&]() {
     HeapType ht = readHeapType();
     if (!ht.isSignature()) {
+      #ifdef __wasi__
+      std::cout << "cont types must be built from function types" << std::endl;
+      abort();
+      #else
       throw ParseException("cont types must be built from function types");
+      #endif
     }
     return Continuation(ht);
   };
@@ -2301,8 +2306,14 @@ void WasmBinaryReader::readTypes() {
         return Immutable;
       case 1:
         return Mutable;
-      default:
+      default: {
+        #ifdef __wasi__
+        std::cout << "Expected 0 or 1 for mutability" << std::endl;
+        abort();
+        #else
         throw ParseException("Expected 0 or 1 for mutability");
+        #endif
+      }
     }
   };
 
@@ -2761,7 +2772,12 @@ static int32_t readBase64VLQ(std::istream& in) {
   while (1) {
     auto ch = in.get();
     if (ch == EOF) {
+      #ifdef __wasi__
+      std::cout << "unexpected EOF in the middle of VLQ" << std::endl;
+      abort();
+      #else
       throw MapParseException("unexpected EOF in the middle of VLQ");
+      #endif
     }
     if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch < 'g')) {
       // last number digit
@@ -2771,7 +2787,12 @@ static int32_t readBase64VLQ(std::istream& in) {
     }
     if (!(ch >= 'g' && ch <= 'z') && !(ch >= '0' && ch <= '9') && ch != '+' &&
         ch != '/') {
+      #ifdef __wasi__
+      std::cout << "invalid VLQ digit" << std::endl;
+      abort();
+      #else
       throw MapParseException("invalid VLQ digit");
+      #endif
     }
     uint32_t digit =
       ch > '9' ? ch - 'g' : (ch >= '0' ? ch - '0' + 20 : (ch == '+' ? 30 : 31));
@@ -2803,8 +2824,13 @@ void WasmBinaryReader::readSourceMapHeader() {
   auto mustReadChar = [&](char expected) {
     char c = sourceMap->get();
     if (c != expected) {
+      #ifdef __wasi__
+      std::cout << "Unexpected char: expected '" << expected << "' got: '" << c << "'" << std::endl;
+      abort();
+      #else
       throw MapParseException(std::string("Unexpected char: expected '") +
                               expected + "' got '" + c + "'");
+      #endif
     }
   };
 
@@ -2848,7 +2874,12 @@ void WasmBinaryReader::readSourceMapHeader() {
       while (1) {
         int ch = sourceMap->get();
         if (ch == EOF) {
+          #ifdef __wasi__
+          std::cout << "unexpected EOF in the middle of string" << std::endl;
+          abort();
+          #else
           throw MapParseException("unexpected EOF in the middle of string");
+          #endif
         }
         if (ch == '\"') {
           break;
@@ -2861,7 +2892,12 @@ void WasmBinaryReader::readSourceMapHeader() {
   };
 
   if (!findField("sources")) {
+    #ifdef __wasi__
+    std::cout << "cannot find the 'sources' field in map" << std::endl;
+    abort();
+    #else
     throw MapParseException("cannot find the 'sources' field in map");
+    #endif
   }
 
   skipWhitespace();
@@ -2878,7 +2914,12 @@ void WasmBinaryReader::readSourceMapHeader() {
   }
 
   if (!findField("mappings")) {
+    #ifdef __wasi__
+    std::cout << "cannot find the 'mappings' field in map" << std::endl;
+    abort();
+    #else
     throw MapParseException("cannot find the 'mappings' field in map");
+    #endif
   }
 
   mustReadChar('\"');
@@ -2936,7 +2977,12 @@ void WasmBinaryReader::readNextDebugLocation() {
       break;
     }
     if (ch != ',') {
+      #ifdef __wasi__
+      std::cout << "Unexpected delimiter" << std::endl;
+      abort();
+      #else
       throw MapParseException("Unexpected delimiter");
+      #endif
     }
 
     int32_t positionDelta = readBase64VLQ(*sourceMap);
@@ -7924,7 +7970,12 @@ void WasmBinaryReader::visitSuspend(Suspend* curr) {
 }
 
 void WasmBinaryReader::throwError(std::string text) {
+  #ifdef __wasi__
+  std::cout << "parse exception occured" << std::endl;
+  abort();
+  #else
   throw ParseException(text, 0, pos);
+  #endif
 }
 
 void WasmBinaryReader::validateHeapTypeUsingChild(Expression* child,
