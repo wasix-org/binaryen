@@ -720,6 +720,12 @@ private:
       return Flow(NONCONSTANT_FLOW);
     }
     #endif
+
+    #ifdef __wasi__
+    if (trapHappened) {
+      return Flow(NONCONSTANT_FLOW);
+    }
+    #endif
     // If we are replacing the expression, then the resulting value must be of
     // a type we can emit a constant for.
     if (!flow.breaking() && replaceExpression &&

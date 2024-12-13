@@ -1314,6 +1314,7 @@ public:
   Flow visitUnreachable(Unreachable* curr) {
     NOTE_ENTER("Unreachable");
     trap("unreachable");
+    return Flow();
     WASM_UNREACHABLE("unreachable");
   }
 
@@ -2558,8 +2559,7 @@ public:
 
   void trap(const char* why) override {
     #ifdef __wasi__
-    std::cout << "trap has occured: " << why << std::endl;
-    abort();
+    trapHappened = true;
     #else
     throw NonconstantException(); 
     #endif

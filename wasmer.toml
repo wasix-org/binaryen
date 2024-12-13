@@ -1,5 +1,6 @@
 [package]
-name = "amin/wasm-opt"
+name = "wasmer/wasm-opt"
+version = "0.1190000.1"
 
 [[module]]
 name = "wasm-opt"

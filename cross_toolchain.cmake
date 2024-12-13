@@ -4,9 +4,8 @@ set(CMAKE_SYSTEM_PROCESSOR wasm32)
 set(CMAKE_SYSROOT $ENV{SYSROOT})
 set(triple wasm32-wasi)
 
-set(tools $ENV{TOOLCHAIN})
-set(CMAKE_C_COMPILER ${tools}/bin/clang)
-set(CMAKE_CXX_COMPILER ${tools}/bin/clang++)
+set(CMAKE_C_COMPILER clang-16)
+set(CMAKE_CXX_COMPILER clang++-16)
 set(CMAKE_C_COMPILER_TARGET ${triple})
 set(CMAKE_CXX_COMPILER_TARGET ${triple})
 

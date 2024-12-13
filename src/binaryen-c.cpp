@@ -6155,7 +6155,7 @@ ExpressionRunnerRunAndDispose(ExpressionRunnerRef runner,
   try {
   #endif
     auto flow = R->visit(expr);
-    if (!flow.breaking() && !flow.values.empty()) {
+    if (!flow.breaking() && !flow.values.empty() && !trapHappened) {
       ret = flow.getConstExpression(*R->getModule());
     }
   #ifndef __wasi__

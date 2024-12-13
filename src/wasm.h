@@ -24,6 +24,8 @@
 #ifndef wasm_wasm_h
 #define wasm_wasm_h
 
+extern bool trapHappened;
+
 #include <algorithm>
 #include <array>
 #include <cassert>

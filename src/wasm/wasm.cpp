@@ -19,6 +19,8 @@
 #include "wasm-traversal.h"
 #include "wasm-type.h"
 
+bool trapHappened = false;
+
 namespace wasm {
 
 // shared constants
